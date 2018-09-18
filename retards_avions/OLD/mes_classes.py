@@ -3,7 +3,7 @@ from os import path
 from datetime import datetime
 
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import re
 
 import os
@@ -248,9 +248,6 @@ class Vols():
         self._logs('__init__ : AVANT INDEXATION', param = self._logs_param)
         self.create_indexed_flies(self)
         self._logs('__init__ : APRES INDEXATION', param = self._logs_param)
-        
-        # On va maintenant entrainer les models de prédiction
-        self.Prepare_Model(self)
         
     
     def get_info_by_id(self, id, feature = None):
@@ -880,8 +877,6 @@ Vols.execution1 = execution1
 
 
 
-
-#TODO : IL FAUT AJOUTER HDAYS : KeyError: "['HDAYS'] not in index"
 ### METHODE D'OPTIMISATION
 def pre_modelisation_2(self, l_features_numeriques  = ['DISTANCE', 'HDAYS'], **kwargs):
     ### ON AJOUTE le nom de la compagnie 'AIRLINE_ID' dans les données catégorielles
@@ -1792,129 +1787,10 @@ def get_prediction(self, ville_origine, ville_arrivee, datedep,
     ].index.values
     
     retard_arrivee = m_data.loc[idx,'ARR_DELAY'].get_values()[0]
-    #prediction  = idx[0]
-    prediction = self.Interroge_prediction(idx[0])
+    prediction  = idx[0]
     ###### /!\ ATTENTION IL FAUT CHANGER LA VALEUR DE L'INDEX PAR LA VALEUR DE PREDICTION
     
     return retard_arrivee, prediction
 
 Vols.get_prediction = get_prediction
 
-
-# =============================================================================
-# 
-# 
-# Préparation et Entrainement des modeles
-# 
-# 
-# =============================================================================
-
-def Prepare_Model(self):
-    from .mes_fonctions import fabrication_model_general
-    
-    name = 'Prepare_Model'
-
-    def log_info(msg, param=''):
-        self.ajoute_logs('{} : {} {}'.format(name, msg, param))
-    
-#    d_features_general = {
-#                'l_numerical': ['DISTANCE', 'CARRIER_DELAY', 'WEATHER_DELAY', 'NAS_DELAY', 
-#                                'SECURITY_DELAY','LATE_AIRCRAFT_DELAY', 'DEP_DELAY' ],
-#                                
-#                'l_categoriel': ['MONTH', 'DAY_OF_MONTH', 
-#                              'ORIGIN_AIRPORT_SEQ_ID', 'DEST_AIRPORT_SEQ_ID', 
-#                              'ARR_HOUR', 'DEP_HOUR', 
-#                              'DAY_OF_WEEK', 'AIRLINE_ID', 'HDAYS', 'ARR_DEL15']
-#                }
-    
-    d_features_general = {
-                'l_numerical': ['DISTANCE', ],
-                                
-                'l_categoriel': ['MONTH', 'DAY_OF_MONTH', 
-                              'ORIGIN_AIRPORT_SEQ_ID', 'DEST_AIRPORT_SEQ_ID', 
-                              'ARR_HOUR', 'DEP_HOUR', 
-                              'DAY_OF_WEEK', 'HDAYS', ]
-                }
-    
-    d_features_interne = {
-                'l_numerical': ['DISTANCE'],
-                                
-                'l_categoriel': ['MONTH', 'DAY_OF_MONTH', 
-                              'ORIGIN_AIRPORT_SEQ_ID', 'DEST_AIRPORT_SEQ_ID', 
-                              'ARR_HOUR', 'DEP_HOUR', 
-                              'DAY_OF_WEEK', 'HDAYS']
-                }
-    
-    #l_feature_a_modifier = ['CARRIER_DELAY', 'WEATHER_DELAY', 'NAS_DELAY', 
-    #                            'SECURITY_DELAY','LATE_AIRCRAFT_DELAY', 'DEP_DELAY']
-    l_feature_a_modifier = []
-     
-    l_model = []
-    l_model_optimisation = []
-    
-    for m_id in self._data['AIRLINE_ID'].unique().tolist():
-        #log_info("Traitement de l'ID : ")
-        data = self._data[self._data['AIRLINE_ID']==m_id]
-        
-        
-        N_Data, N_Model_Optimisation, N_Model = fabrication_model_general( 
-            data = data, 
-            d_features = d_features_general,
-            isRidge = True, 
-            isLasso = True)
-        
-
-            
-        N_Model['AIRLINE_ID'] = m_id
-        N_Model_Optimisation['AIRLINE_ID'] = m_id
-        
-        l_model.append(N_Model)
-        l_model_optimisation.append(N_Model_Optimisation)
-        
-    self._models = l_model
-    self._model_optimisation = l_model_optimisation
-    self._d_features_general = d_features_general
-
-Vols.Prepare_Model = Prepare_Model
-
-# =============================================================================
-# 
-# 
-# La prédiction en soit
-# 
-# 
-# =============================================================================
-
-
-def Interroge_prediction(self, idx):
-    from .mes_fonctions import prediction_modele_general
-    
-    #prediction_modele_general(input_X_test, d_features, F_Model_Optimisation, F_Model, Type_Model)
-    
-    AIRLINE_ID = self.data.iloc[idx]['AIRLINE_ID']
-    
-    for i in self._model_optimisation:
-        if i['AIRLINE_ID'] == AIRLINE_ID:
-            m_model_optimisation = i
-            
-    for i in self._models:
-        if i['AIRLINE_ID'] == AIRLINE_ID:
-            m_model = i
-    
-    y_pred = prediction_modele_general(
-           input_X_test = self._data.iloc[idx:idx+1],
-            d_features = self._d_features_general, 
-            F_Model_Optimisation = m_model_optimisation, 
-            F_Model = m_model, 
-            Type_Model = 'LassoCV')
-    
-    return round(y_pred[0], 3)
-    
-Vols.Interroge_prediction = Interroge_prediction
-    
-#    for i in self._models:
-#        if i['AIRLINE_ID']==AIRLINE_ID:
-#            model = 
-    
-    
-    
