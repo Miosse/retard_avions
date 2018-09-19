@@ -16,3 +16,6 @@ AEROPORT_DATABAS_URI = os.path.join(basedir,
                                     'retards_avions/datas/aeroports_nettoyes.csv') 
 VOLS_DATABAS_URI = os.path.join(basedir, 
                                     'retards_avions/datas/datas_total_nettoyees-Q4.csv') 
+REPERTOIRE_STOCKAGE_MODELS_URI = os.path.join(basedir, 
+                                    'retards_avions/datas/MODELS/')
+
