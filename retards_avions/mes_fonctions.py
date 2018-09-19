@@ -781,3 +781,138 @@ def get_info(model):
         del val['GENERAL']
         return val
 
+
+# =============================================================================
+# 
+# 
+# 
+# Stockage des Models
+# - Une fois les models entraines, nous allons les stocker dans des fichiers
+# - Nous allons aussi gérer le chargement de ces derniers
+# 
+# 
+# 
+# =============================================================================
+
+
+ 
+# Sauvegarde d'un model dans un fichier via un nom créé à partir des paramètres
+def save_model(path_directory, id_compagnie, type_modelisation, model):
+    from sklearn.externals import joblib
+    
+    nom_fichier = '{}model_{}_{}.pkl'.format(
+            path_directory,
+            id_compagnie, 
+            type_modelisation 
+            )
+    joblib.dump(model, nom_fichier) 
+    print('sauvegarde du fichier {}'.format(nom_fichier))
+    
+    
+# Chargement d'un model à partir d'un fichier :
+##  dont le nom est créé à partir des paramètres
+    
+def load_model(path_directory, id_compagnie, type_modelisation):
+    from sklearn.externals import joblib
+    from os.path import isfile
+    
+    nom_fichier = '{}model_{}_{}.pkl'.format(
+            path_directory,
+            id_compagnie, 
+            type_modelisation 
+            )
+    
+    ## On ajoute un contrôle d'existence du fichier
+    if (isfile(nom_fichier)):    
+        ## On charge le fichier
+        model = joblib.load(nom_fichier) 
+        print('chargement du fichier {}'.format(nom_fichier))
+    else:
+        print("Attention le fichier {} n'existe pas".format(nom_fichier))
+    
+    ## On retourne le fichier
+    return model
+
+
+## Sauvegarde des modèles principaux pour toutes les compagnies
+## A partir d'une liste de modèles        
+def save_my_models(models, path_directory=''):
+    l_modelisation = ['LinearRegression', 'RidgeCV', 'LassoCV']
+    
+    for m_model in models:
+        AIRLINE_ID = m_model['AIRLINE_ID']
+        for type_model in l_modelisation:
+            if type_model in m_model.keys():
+                save_model(path_directory = path_directory, 
+                           id_compagnie = AIRLINE_ID,
+                           type_modelisation = type_model,
+                           model = m_model[type_model]['Model'],
+                           )
+
+## Sauvegarde des modèles principaux pour toutes les compagnies
+## A partir d'une liste d'optimisation
+def save_my_optimisation_models(models, path_directory=''):
+    l_modelisation = ['OneHotEncoder', 'StandardScaler']
+    
+    for m_model in models:
+        AIRLINE_ID = m_model['AIRLINE_ID']
+        for type_model in l_modelisation:
+            if type_model in m_model.keys():
+                save_model(path_directory = path_directory,
+                           id_compagnie = AIRLINE_ID,
+                           type_modelisation = type_model,
+                           model = m_model[type_model],
+                           )
+
+## Chargement des modèles principaux pour toutes les compagnies
+## A partir d'une liste de modèles 
+def load_my_models(l_AIRLINE_ID, path_directory=''):
+    l_modelisation = ['LinearRegression', 'RidgeCV', 'LassoCV']
+    l_model = []
+    
+    for id in l_AIRLINE_ID:
+        d_model = {'AIRLINE_ID': id}
+        for m_type_modelisation in l_modelisation:
+            d_model[m_type_modelisation] = {}
+            
+            loaded_model = load_model(
+                    path_directory, 
+                    id_compagnie = id, 
+                    type_modelisation = m_type_modelisation
+                    )
+            
+            d_model[m_type_modelisation]['Model'] = loaded_model
+        
+        ## On ajoute ce modele à la liste
+        l_model.append(d_model)
+
+    # On renvoie la liste créée
+    return l_model
+    
+## Chargement des modèles d'optimisation pour toutes les compagnies
+## A partir d'une liste d'optimisation
+def load_my_optimisation_models(l_AIRLINE_ID, path_directory=''):
+    l_modelisation = ['OneHotEncoder', 'StandardScaler']
+    l_model = []
+    
+    for id in l_AIRLINE_ID:
+        d_model = {'AIRLINE_ID': id}
+        for m_type_modelisation in l_modelisation:
+            
+            loaded_model = load_model(
+                    path_directory, 
+                    id_compagnie = id, 
+                    type_modelisation = m_type_modelisation
+                    )
+            d_model[m_type_modelisation] = loaded_model
+        
+        ## On ajoute ce modele à la liste
+        l_model.append(d_model)
+        
+    # On renvoie la liste créée
+    return l_model
+
+
+
+
+

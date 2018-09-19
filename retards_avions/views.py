@@ -11,9 +11,13 @@ app.config.from_object('config')
 from .utils import get_ville, get_destinations, get_vols, get_date_vols,\
      get_vols_jour, get_prediction
 
-from .utils import activate
 # Gestion des logs
 from .utils import affiche_logs, supprime_logs, ajoute_logs
+
+# Gestion du stockage des models
+from .utils import prepare_models, chargement_models
+
+
 
 from .utils import get_df_value
 from .utils import retourne_films_info_by_id, retourne_liste_films_info_by_cat 
@@ -52,11 +56,6 @@ def index():
                            villes = j_villes, 
                            spy = request.args)
     #return resp
-
-@app.route('/activate/')
-def activate():
-    activate()
-    return "Nous activons"
 
 
 ### FONCTION DE TEST 
@@ -114,6 +113,27 @@ def m_final():
         return request.form
     else:
         return request.args
+
+
+#### A N'APPELER QUE SUR LE SERVEUR D'ENTRAINEMENT
+### CELA VA GENERER LES FICHIERS CONTENANT LES MODELES
+@app.route('/activate/')
+def enregistre_models():
+    prepare_models()
+    
+    return 'Nous avons enregistré les models'
+
+
+@app.route('/load/')
+def charge_models():
+    chargement_models()
+    
+    return 'Nous avons chargé les models'
+
+
+
+
+
 
 @app.route('/test/')
 def test():

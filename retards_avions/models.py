@@ -15,6 +15,7 @@ class Aeroport(Aeroport):
 
 class Vols(Vols):
     _nom_fichier = app.config['VOLS_DATABAS_URI']
+    _repertoire_models = app.config['REPERTOIRE_STOCKAGE_MODELS_URI']
 
 
 Aeroport = Aeroport()

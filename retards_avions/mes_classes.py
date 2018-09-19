@@ -34,7 +34,7 @@ class Logs():
             s_msg = s_msg + i +'\n'
         return s_msg
     
-    def affiche(self, nb_lignes=30):
+    def affiche(self, nb_lignes=200):
         s_msg = ''
         for i in self._liste_msg[-nb_lignes:]:
             s_msg = s_msg + i +'\n'
@@ -192,6 +192,7 @@ class Aeroport():
 class Vols():
     """Classe de Stockage de la liste des Aeroports"""
     _nom_fichier = 'datas_total_nettoyees-Q4.csv'
+    _repertoire_models = 'data_models'
     _file_loaded = False
     
     # Lien sur les aeroports
@@ -249,9 +250,8 @@ class Vols():
         self._logs('__init__ : APRES INDEXATION', param = self._logs_param)
         
         # On va maintenant entrainer les models de prédiction
-        self._logs('__init__ : AVANT PREPARATION MODEL', param = self._logs_param)
-        #self.Prepare_Model(self)
-        self._logs('__init__ : APRES PREPARATION MODEL', param = self._logs_param)
+        #On supprime le fait de lancer l'entrainement des models ici
+        ###self.Prepare_Model(self)
         
     
     def get_info_by_id(self, id, feature = None):
@@ -1812,11 +1812,13 @@ Vols.get_prediction = get_prediction
 
 def Prepare_Model(self):
     from .mes_fonctions import fabrication_model_general
+    from .mes_fonctions import save_my_models, save_my_optimisation_models
     
     name = 'Prepare_Model'
-
+        
     def log_info(msg, param=''):
-        self.ajoute_logs('{} : {} {}'.format(name, msg, param))
+        #self.ajoute_logs('{} : {} {}'.format(name, msg, param))
+        self._logs('-- {} : {}'.format(name, msg), param = self._logs_param)
     
 #    d_features_general = {
 #                'l_numerical': ['DISTANCE', 'CARRIER_DELAY', 'WEATHER_DELAY', 'NAS_DELAY', 
@@ -1854,7 +1856,7 @@ def Prepare_Model(self):
     l_model_optimisation = []
     
     for m_id in self._data['AIRLINE_ID'].unique().tolist():
-        #log_info("Traitement de l'ID : ")
+        log_info("Traitement de l'ID : {}".format(m_id))
         data = self._data[self._data['AIRLINE_ID']==m_id]
         
         
@@ -1864,19 +1866,66 @@ def Prepare_Model(self):
             isRidge = True, 
             isLasso = True)
         
-
-            
         N_Model['AIRLINE_ID'] = m_id
         N_Model_Optimisation['AIRLINE_ID'] = m_id
         
         l_model.append(N_Model)
         l_model_optimisation.append(N_Model_Optimisation)
         
-    self._models = l_model
-    self._model_optimisation = l_model_optimisation
-    self._d_features_general = d_features_general
+#    self._models = l_model
+#    self._model_optimisation = l_model_optimisation
+#    self._d_features_general = d_features_general
+        
+    ## On sauvegarde nos modeles
+    save_my_models(models = l_model, 
+                   path_directory = self._repertoire_models)
+    save_my_optimisation_models(models = l_model_optimisation,
+                                path_directory = self._repertoire_models)
+    #self._d_features_general = d_features_general
+    
 
 Vols.Prepare_Model = Prepare_Model
+
+
+#########################################
+### GESTION DE CHARGEMENT DES MODELES
+#########################################
+
+
+def Charge_Models(self):
+    from .mes_fonctions import load_my_models, load_my_optimisation_models
+    
+    name = 'Charge_Models'
+        
+    def log_info(msg, param=''):
+        #self.ajoute_logs('{} : {} {}'.format(name, msg, param))
+        self._logs('-- {} : {}'.format(name, msg), param = self._logs_param)
+    
+    
+    
+    d_features_general = {
+        'l_numerical': ['DISTANCE', ],
+        'l_categoriel': ['MONTH', 'DAY_OF_MONTH', 
+                      'ORIGIN_AIRPORT_SEQ_ID', 'DEST_AIRPORT_SEQ_ID', 
+                      'ARR_HOUR', 'DEP_HOUR', 
+                      'DAY_OF_WEEK', 'HDAYS', ]
+        }
+
+    
+    self._models = load_my_models(
+            l_AIRLINE_ID = self._data['AIRLINE_ID'].unique().tolist(),
+            path_directory = self._repertoire_models
+            )
+    
+    self._model_optimisation = load_my_optimisation_models(
+            l_AIRLINE_ID = self._data['AIRLINE_ID'].unique().tolist(),
+            path_directory = self._repertoire_models
+            )
+    
+    self._d_features_general = d_features_general
+    
+Vols.Charge_Models = Charge_Models
+
 
 # =============================================================================
 # 

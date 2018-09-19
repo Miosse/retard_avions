@@ -12,8 +12,7 @@ from retards_avions.models import Aeroport, Vols
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-def activate():
-    Vols.Prepare_Model() 
+
 
 def mon_test():
     valeur = Aeroport.data
@@ -136,6 +135,17 @@ def get_prediction(ville_origine, ville_arrivee, datedep,
                             airline_id, dep_hour, arr_hour)
 
 
+    ########################################
+    #####   GESTION DU STOCKAGE DES MODELS
+    ########################################
+
+def prepare_models():
+    Vols.Prepare_Model()
+    
+
+def chargement_models():    
+    Vols.Charge_Models()
+    
 
     #########################
     #####   GESTION DES LOGS
