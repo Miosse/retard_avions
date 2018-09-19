@@ -126,7 +126,7 @@ def enregistre_models():
 
 @app.route('/load/')
 def charge_models():
-    chargement_models()
+    #chargement_models()
     
     return 'Nous avons chargé les models'
 

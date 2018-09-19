@@ -253,6 +253,11 @@ class Vols():
         #On supprime le fait de lancer l'entrainement des models ici
         ###self.Prepare_Model(self)
         
+        self._logs('__init__ : Avant le chargement des models', param = self._logs_param)
+        self.Charge_Models(self)
+        self._logs('__init__ : Apres le chargement des models', param = self._logs_param)
+        
+        
     
     def get_info_by_id(self, id, feature = None):
         if feature==None:
