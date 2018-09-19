@@ -12,7 +12,8 @@ from retards_avions.models import Aeroport, Vols
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-
+def activate():
+    Vols.Prepare_Model() 
 
 def mon_test():
     valeur = Aeroport.data

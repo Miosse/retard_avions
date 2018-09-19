@@ -250,7 +250,7 @@ class Vols():
         
         # On va maintenant entrainer les models de prédiction
         self._logs('__init__ : AVANT PREPARATION MODEL', param = self._logs_param)
-        self.Prepare_Model(self)
+        #self.Prepare_Model(self)
         self._logs('__init__ : APRES PREPARATION MODEL', param = self._logs_param)
         
     
